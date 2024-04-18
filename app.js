@@ -122,7 +122,6 @@ app.put('/alunos/:id', async (req, res) => {
     res.status(500).send('Error updating student');
   }
 });
-
 // Rota para excluir um aluno
 app.delete('/alunos/:id', async (req, res) => {
   const { id } = req.params;
@@ -130,8 +129,12 @@ app.delete('/alunos/:id', async (req, res) => {
     return res.status(400).send('Invalid student ID');
   }
   try {
-    await pool.query('DELETE FROM Aluno WHERE AlunoID = $1', [id]);
-    res.send('Student deleted successfully');
+    const result = await pool.query('DELETE FROM Aluno WHERE AlunoID = $1', [id]);
+    if (result.rowCount > 0) {
+      res.send('Student deleted successfully');
+    } else {
+      res.status(404).send('Student not found');
+    }
   } catch (err) {
     console.error('Error executing query', err);
     res.status(500).send('Error deleting student');
@@ -202,4 +205,4 @@ app.delete('/professores/:id', async (req, res) => {
 const server = app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
 });
-module.exports = { app, server }; // Exporting app and server for testing
+module.exports = app; // Exporting app and server for testing
